@@ -35,6 +35,7 @@ private:
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QMainWindow>
 //#include <QImage>
 #include <QComboBox>
 #include <QFileDialog>
@@ -45,37 +46,43 @@ private:
 #include <QStringList>
 #include <QTimer>
 
-class MainWindow : public QWidget
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow;}
+QT_END_NAMESPACE
+
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
     void removeFilter(unsigned int index);
 
 private:
+    Ui::MainWindow *ui;
+
     QImage Mat2QImage(cv::Mat &src);
     void connectSignals();
 
     CImageHandler imgHandler;
     QTimer *timer;
     //----------*GUI*----------
-    QLabel *labelCamWindow1, *labelCamWindow2, *labelCamID, *labelStatus;
+    QLabel *camWindowLeft, *camWindowRight, *labelCamID, *camStatusLabel;
     QLabel *labelFilters, *labelUsedFilters;
     QVBoxLayout *mainLayout;
     QHBoxLayout *optionsLayout;
     QGridLayout *camsLayout;
     QGridLayout *firstOptionsLayout;
-    QHBoxLayout *secondOptionsLayout;
+    QHBoxLayout *filterOptionsLayout;
 
     QFrame *camsFrame, *firstOptionsFrame, *secondOptionsFrame;
-    QPushButton *buttonCam, *buttonAddFilter, *buttonRemoveFilter, *buttonLoadImage;
-    QComboBox *comboBoxFilters, *comboBoxWindow1, *comboBoxWindow2;
+    QPushButton *camButton, *addFilterButton, *removeFilterButton, *loadImageButton;
+    QComboBox *filtersComboBox, *selectedFrameComboBoxLeft, *selectedFrameComboBoxRight;
     QListView *listViewUsedFilters;
     QLineEdit *lineEditCamID;
-    QListWidget *listWidgetUsedFilters;
+    QListWidget *usedFiltersList;
     QList<CFilterWidget *> filterWidgetList;
     int lastUsedFilterIndex;
 
@@ -88,8 +95,8 @@ private slots:
     void onReleased_buttonLoadImage();
     void onReleased_buttonAddFilter();
     void onReleased_buttonRemoveFilter();
-    void onChanged_comboBoxWindow1(int index);
-    void onChanged_comboBoxWindow2(int index);
+    void onChanged_comboBoxWindowLeft(int index);
+    void onChanged_comboBoxWindowRight(int index);
     void onChanged_usedFilter(int index);
 };
 
