@@ -16,6 +16,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    CImageSource.h \
     cfilter.h \
     cfilterwidget.h \
     cimagehandler.h \
