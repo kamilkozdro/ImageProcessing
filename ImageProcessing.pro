@@ -11,14 +11,19 @@ CONFIG += c++17
 SOURCES += \
     cfilter.cpp \
     cfilterwidget.cpp \
+    cimagecamerasource.cpp \
+    cimagefilesource.cpp \
     cimagehandler.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     CImageSource.h \
+    CMessageBox.h \
     cfilter.h \
     cfilterwidget.h \
+    cimagecamerasource.h \
+    cimagefilesource.h \
     cimagehandler.h \
     mainwindow.h
 

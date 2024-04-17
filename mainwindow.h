@@ -68,21 +68,7 @@ private:
 
     CImageHandler imgHandler;
     QTimer *timer;
-    //----------*GUI*----------
-    QLabel *camWindowLeft, *camWindowRight, *labelCamID, *camStatusLabel;
-    QLabel *labelFilters, *labelUsedFilters;
-    QVBoxLayout *mainLayout;
-    QHBoxLayout *optionsLayout;
-    QGridLayout *camsLayout;
-    QGridLayout *firstOptionsLayout;
-    QHBoxLayout *filterOptionsLayout;
 
-    QFrame *camsFrame, *firstOptionsFrame, *secondOptionsFrame;
-    QPushButton *camButton, *addFilterButton, *removeFilterButton, *loadImageButton;
-    QComboBox *filtersComboBox, *selectedFrameComboBoxLeft, *selectedFrameComboBoxRight;
-    QListView *listViewUsedFilters;
-    QLineEdit *lineEditCamID;
-    QListWidget *usedFiltersList;
     QList<CFilterWidget *> filterWidgetList;
     int lastUsedFilterIndex;
 
