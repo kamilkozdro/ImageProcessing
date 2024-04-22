@@ -8,16 +8,28 @@ CImageFileSource::CImageFileSource()
 
 void CImageFileSource::open(QString arg)
 {
-    image = cv::imread(arg.toStdString());
+
+    QString fileName = QFileDialog::getOpenFileName(nullptr,
+                                                    "Open Image",
+                                                    "",
+                                                    "Image Files (*.png *.jpg *.bmp)");
+
+    if (fileName.isEmpty())
+    {
+        imageLoaded = false;
+        return;
+    }
+
+    image = cv::imread(fileName.toStdString());
+
     if (image.data == NULL)
     {
         showMessageBox("Cannot load image", "Warning", QMessageBox::Icon::Warning);
         imageLoaded = false;
+        return;
     }
-    else
-    {
-        imageLoaded = true;
-    }
+
+    imageLoaded = true;
 }
 
 void CImageFileSource::close()

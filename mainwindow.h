@@ -26,8 +26,12 @@ private:
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "CImageSource.h"
 #include "cfilterwidget.h"
 #include "cimagehandler.h"
+#include "cimagecamerasource.h"
+#include "cimagefilesource.h"
+
 
 #include <QFrame>
 #include <QGridLayout>
@@ -66,12 +70,17 @@ private:
     QImage Mat2QImage(cv::Mat &src);
     void connectSignals();
 
+    CImageSource* imgSource;
+
+
+
     CImageHandler imgHandler;
-    QTimer *timer;
+    QTimer *imageCameraSourceTimer;
 
     QList<CFilterWidget *> filterWidgetList;
     int lastUsedFilterIndex;
 
+    bool openNewImageSource(CImageSource* newImgSource, QString args = "");
     void selectLastUsedFilterIndex();
 
 private slots:

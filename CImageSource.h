@@ -8,6 +8,7 @@
 class CImageSource
 {
 public:
+    virtual ~CImageSource(){};
     virtual void open(QString arg) = 0;
     virtual bool isOpen() = 0;
     virtual void close() = 0;

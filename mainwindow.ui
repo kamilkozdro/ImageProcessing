@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1218</width>
-    <height>843</height>
+    <width>1099</width>
+    <height>833</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
       <item>
        <layout class="QGridLayout" name="camsLayout">
         <property name="sizeConstraint">
-         <enum>QLayout::SetMaximumSize</enum>
+         <enum>QLayout::SetDefaultConstraint</enum>
         </property>
         <item row="4" column="0" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
          <widget class="QComboBox" name="selectedFrameComboBoxLeft">
@@ -66,15 +66,9 @@
          <widget class="QLabel" name="camWindowLeft">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
            </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>49</width>
-            <height>16</height>
-           </size>
           </property>
           <property name="text">
            <string>TextLabel</string>
@@ -85,15 +79,9 @@
          <widget class="QLabel" name="camWindowRight">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
            </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>49</width>
-            <height>16</height>
-           </size>
           </property>
           <property name="text">
            <string>TextLabel</string>
@@ -192,13 +180,23 @@
            <property name="sizeConstraint">
             <enum>QLayout::SetMinimumSize</enum>
            </property>
-           <item row="0" column="2" rowspan="3">
-            <layout class="QVBoxLayout" name="filterOptionsLayout"/>
+           <item row="0" column="5">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
-           <item row="1" column="1" alignment="Qt::AlignLeft|Qt::AlignTop">
-            <widget class="QPushButton" name="addFilterButton">
+           <item row="2" column="1" alignment="Qt::AlignLeft|Qt::AlignTop">
+            <widget class="QPushButton" name="removeFilterButton">
              <property name="text">
-              <string>Add</string>
+              <string>Remove</string>
              </property>
             </widget>
            </item>
@@ -216,30 +214,23 @@
              <property name="selectionMode">
               <enum>QAbstractItemView::SingleSelection</enum>
              </property>
+             <property name="resizeMode">
+              <enum>QListView::Adjust</enum>
+             </property>
             </widget>
            </item>
            <item row="0" column="1" alignment="Qt::AlignLeft|Qt::AlignTop">
             <widget class="QComboBox" name="filtersComboBox"/>
            </item>
-           <item row="2" column="1" alignment="Qt::AlignLeft|Qt::AlignTop">
-            <widget class="QPushButton" name="removeFilterButton">
+           <item row="1" column="1" alignment="Qt::AlignLeft|Qt::AlignTop">
+            <widget class="QPushButton" name="addFilterButton">
              <property name="text">
-              <string>Remove</string>
+              <string>Add</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="4">
-            <spacer name="horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+           <item row="0" column="4" rowspan="2">
+            <layout class="QVBoxLayout" name="filterOptionsLayout"/>
            </item>
           </layout>
          </widget>
@@ -255,7 +246,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1218</width>
+     <width>1099</width>
      <height>21</height>
     </rect>
    </property>

@@ -37,27 +37,32 @@ MainWindow::MainWindow(QWidget *parent)
     ui->selectedFrameComboBoxLeft->addItem("Unchanged frame");
     ui->selectedFrameComboBoxRight->addItem("Unchanged frame");
 
-    ui->usedFiltersList = new QListWidget();
-    ui->usedFiltersList->setMovement(QListView::Static);
-    ui->usedFiltersList->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->usedFiltersList->setSelectionMode(QAbstractItemView::SingleSelection);
-
     lastUsedFilterIndex = -1;
 
-    timer = new QTimer(this);
-    timer->start(500);
+    imgSource = nullptr;
+
+    imageCameraSourceTimer = new QTimer(this);
+    imageCameraSourceTimer->setInterval(500);
     connectSignals();
 }
 
 MainWindow::~MainWindow()
 {
+    if(imgSource != nullptr)
+    {
+        if(imgSource->isOpen())
+            imgSource->close();
+        delete imgSource;
+        imgSource = nullptr;
+    }
+
     delete ui;
 }
 
 QImage MainWindow::Mat2QImage(cv::Mat &src)
 {
-    cv::Mat temp;                           // make the same cv::Mat
-    cvtColor(src, temp, cv::COLOR_BGR2RGB); // cvtColor Makes a copt, that what i need
+    cv::Mat temp;
+    cvtColor(src, temp, cv::COLOR_BGR2RGB);
     QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
     dest.bits(); // enforce deep copy, see documentation
                 // of QImage::QImage ( const uchar * data, int width, int height, Format format )
@@ -66,7 +71,7 @@ QImage MainWindow::Mat2QImage(cv::Mat &src)
 
 void MainWindow::connectSignals()
 {
-    connect(timer, &QTimer::timeout, this, &MainWindow::update);
+    connect(imageCameraSourceTimer, &QTimer::timeout, this, &MainWindow::update);
     connect(ui->camButton, &QPushButton::released, this, &MainWindow::onReleased_buttonCam);
     connect(ui->loadImageButton, &QPushButton::released, this, &MainWindow::onReleased_buttonLoadImage);
     connect(ui->addFilterButton, &QPushButton::released, this, &MainWindow::onReleased_buttonAddFilter);
@@ -78,26 +83,26 @@ void MainWindow::connectSignals()
 
 void MainWindow::update()
 {
-    // DODAC WYJATEK DLA imgHandler.isImageLoaded()
     // ODSWIEZAC TYLKO PRZY DODANIU FILTRU LUB ZMIANIE PARAMETROW
 
-    if (imgHandler.isCamOpened() || imgHandler.isImageLoaded())
-    {
-        ui->camStatusLabel->setText("Opened");
-        QImage frame1, frame2;
-        cv::Mat cvFrame;
-        imgHandler.updateObject();
-        imgHandler.getFrame1().copyTo(cvFrame); //kopiowanie obrazu - SLABOOOOO
-        frame1 = Mat2QImage(cvFrame);
-        imgHandler.getFrame2().copyTo(cvFrame); //kopiowanie obrazu - SLABOOOOO
-        frame2 = Mat2QImage(cvFrame);
-        ui->camWindowLeft->setPixmap(QPixmap::fromImage(frame1));
-        ui->camWindowRight->setPixmap(QPixmap::fromImage(frame2));
-    }
-    else
-    {
-        ui->camStatusLabel->setText("Closed");
-    }
+    if(imgSource == nullptr)
+        return;
+
+    if(!imgSource->isOpen())
+        return;
+
+
+    QImage frame1, frame2;
+    cv::Mat cvFrame;
+    //imgHandler.updateObject();
+    //imgHandler.getFrame1().copyTo(cvFrame); //kopiowanie obrazu - SLABOOOOO
+
+    frame1 = Mat2QImage(imgSource->getImage());
+    //imgHandler.getFrame2().copyTo(cvFrame); //kopiowanie obrazu - SLABOOOOO
+    frame2 = Mat2QImage(imgSource->getImage());
+    ui->camWindowLeft->setPixmap(QPixmap::fromImage(frame1));
+    ui->camWindowRight->setPixmap(QPixmap::fromImage(frame2));
+
 }
 
 void MainWindow::removeFilter(unsigned int index)
@@ -113,36 +118,60 @@ void MainWindow::removeFilter(unsigned int index)
     delete widgetToDelete;
 }
 
-void MainWindow::onReleased_buttonCam()
+bool MainWindow::openNewImageSource(CImageSource* newImgSource, QString args)
 {
-
-    if (imgHandler.isCamOpened()) {
-        imgHandler.releaseCam();
-        ui->camButton->setText("Open Cam");
-    } else {
-        QString camID = ui->camIDSpinBox->text();
-        imgHandler.openCam(camID.toInt());
-        ui->camButton->setText("Close Cam");
+    imageCameraSourceTimer->stop();
+    if(imgSource != nullptr)
+    {
+        imgSource->close();
+        delete imgSource;
+        imgSource = nullptr;
     }
 
+    newImgSource->open(args);
+
+    if(!newImgSource->isOpen())
+    {
+        return false;
+    }
+
+    imgSource = newImgSource;
+    return true;
 }
 
 void MainWindow::onReleased_buttonLoadImage()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open Image"),
-                                                    "",
-                                                    tr("Image Files (*.png *.jpg *.bmp)"));
 
-    if (fileName.isEmpty())
-        return;
-
-    if (imgHandler.isCamOpened())
+    CImageFileSource* newImgSource = new CImageFileSource();
+    if(!openNewImageSource(newImgSource))
     {
-        imgHandler.releaseCam();
+        delete newImgSource;
+        newImgSource = nullptr;
+        return;
     }
 
-    imgHandler.openImage(fileName);
+    imgHandler.setFrame(imgSource->getImage());
+    update();
+}
+
+void MainWindow::onReleased_buttonCam()
+{
+
+    CImageCameraSource* newImgSource = new CImageCameraSource();
+    QString camID = ui->camIDSpinBox->text();
+
+    if(!openNewImageSource(newImgSource, camID))
+    {
+        delete newImgSource;
+        newImgSource = nullptr;
+        ui->camButton->setText("Open Cam");
+        return;
+    }
+
+    imageCameraSourceTimer->start();
+    imgHandler.setFrame(imgSource->getImage());
+    ui->camButton->setText("Close Cam");
+
 }
 
 void MainWindow::onReleased_buttonAddFilter()
@@ -170,7 +199,7 @@ void MainWindow::onReleased_buttonRemoveFilter()
 {
     if (ui->usedFiltersList->count() > 0)
     {
-        removeFilter(usedFiltersList->currentRow());
+        removeFilter(ui->usedFiltersList->currentRow());
         selectLastUsedFilterIndex();
     }
 }

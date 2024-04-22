@@ -8,30 +8,6 @@ CImageHandler::CImageHandler()
 
 CImageHandler::~CImageHandler() {}
 
-int CImageHandler::openCam(int camID)
-{
-    if (!cam.open(camID)) {
-        showMessageBox("Cannot open camera", "Warning", QMessageBox::Icon::Warning);
-        return 0;
-    }
-
-    imageLoaded = false;
-
-    return 1;
-}
-
-void CImageHandler::openImage(QString filePath)
-{
-    frame = cv::imread(filePath.toStdString());
-
-    if (frame.data == NULL) {
-        showMessageBox("Cannot load image", "Warning", QMessageBox::Icon::Warning);
-        return;
-    }
-
-    imageLoaded = true;
-}
-
 void CImageHandler::removeFilter(unsigned int index)
 {
     try {
@@ -127,13 +103,4 @@ void CImageHandler::useFilter(cv::Mat &src, cv::Mat &dest, CFilter *filter)
         std::cerr << "CImageHandler::useFilter()" << e.what() << std::endl;
         return;
     }
-}
-
-void CImageHandler::showMessageBox(QString text, QString title, QMessageBox::Icon icon)
-{
-    QMessageBox message;
-    message.setWindowTitle(title);
-    message.setText(text);
-    message.setIcon(icon);
-    message.exec();
 }
