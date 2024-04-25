@@ -1,6 +1,8 @@
 #ifndef CFILTERWIDGET_H
 #define CFILTERWIDGET_H
 
+#include <QMap>
+#include <QString>
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QLabel>
@@ -18,20 +20,19 @@ class CFilterWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CFilterWidget(CFilter::filterType filterType, QWidget *parent = nullptr);
+    explicit CFilterWidget(CFilter* newFilter, QWidget *parent = nullptr);
     ~CFilterWidget();
 
     void initGUI();
-    QList<float> getFilterValues() { return filter->getParameterValues(); };
-    CFilter::filterType getFilterType() { return filter->getType(); };
+    //QList<float> getFilterValues() { return filter->getParameterValues(); };
     CFilter *getFilterPtr() { return filter; };
 
 private:
     //----------*GUI*----------
     QVBoxLayout *mainLayout;
     QFormLayout *formLayout;
-    QList<QLineEdit *> lineEditList;
-    QList<QString> labelsNames;
+    //QList<QLineEdit *> lineEditList;
+    //QList<QString> labelsNames;
     QDialogButtonBox *dialogButtons;
     //-------------------------
     CFilter *filter;

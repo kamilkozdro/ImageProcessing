@@ -26,13 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setWindowTitle("Image Processing");
 
-    ui->filtersComboBox->addItem(CFilter::typeToString(CFilter::filterType::Blur));
-    ui->filtersComboBox->addItem(CFilter::typeToString(CFilter::filterType::Medianblur));
-    ui->filtersComboBox->addItem(CFilter::typeToString(CFilter::filterType::Dilate));
-    ui->filtersComboBox->addItem(CFilter::typeToString(CFilter::filterType::Erode));
-    ui->filtersComboBox->addItem(CFilter::typeToString(CFilter::filterType::Sobel));
-    ui->filtersComboBox->addItem(CFilter::typeToString(CFilter::filterType::Gaussian));
-    ui->filtersComboBox->addItem(CFilter::typeToString(CFilter::filterType::Laplacian));
+    ui->filtersComboBox->addItem(CFilterBlur::getFilterName());
 
     ui->selectedFrameComboBoxLeft->addItem("Unchanged frame");
     ui->selectedFrameComboBoxRight->addItem("Unchanged frame");
@@ -177,10 +171,11 @@ void MainWindow::onReleased_buttonCam()
 void MainWindow::onReleased_buttonAddFilter()
 {
     QString chosenFilterName = ui->filtersComboBox->currentText();
-    CFilter::filterType chosenFilterType = CFilter::stringToType(chosenFilterName);
-    CFilterWidget *filterWidget = new CFilterWidget(chosenFilterType);
+    CFilter* newFilter = CFilter::createFilter(chosenFilterName);
+    CFilterWidget *filterWidget = new CFilterWidget(newFilter);
 
-    imgHandler.addFilter(filterWidget->getFilterPtr());
+    //imgHandler.addFilter(filterWidget->getFilterPtr());
+    imgHandler.addFilter(newFilter);
 
     ui->usedFiltersList->addItem(chosenFilterName);
 

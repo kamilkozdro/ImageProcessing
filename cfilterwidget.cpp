@@ -1,48 +1,18 @@
 #include "cfilterwidget.h"
 
-CFilterWidget::CFilterWidget(CFilter::filterType filterType, QWidget *parent)
+CFilterWidget::CFilterWidget(CFilter* newFilter, QWidget *parent)
     : QWidget{parent}
 {
-    try {
-        switch (filterType) {
-        case CFilter::filterType::Blur:
-            filter = new CFilterBlur();
-            break;
+    filter = newFilter;
 
-        case CFilter::filterType::Sobel:
-            filter = new CFilterSobel();
-            break;
-        case CFilter::filterType::Dilate:
-            filter = new CFilterDilate();
-            break;
-        case CFilter::filterType::Erode:
-            filter = new CFilterErode();
-            break;
-        case CFilter::filterType::Gaussian:
-            filter = new CFilterGaussian();
-            break;
-        case CFilter::filterType::Laplacian:
-            filter = new CFilterLaplacian();
-            break;
-        case CFilter::filterType::Medianblur:
-            filter = new CFilterMedianblur();
-            break;
+    initGUI();
 
-        default:
-            throw std::invalid_argument("Uknown filterType");
-            break;
-        }
-
-        initGUI();
-    } catch (std::exception &e) {
-        std::cerr << "CFilterWidget::CFilterWidget():" << e.what() << std::endl;
-        return;
-    }
 }
 
 CFilterWidget::~CFilterWidget()
 {
-    if (filter != nullptr) {
+    if (filter != nullptr)
+    {
         delete filter;
         filter = nullptr;
     }
@@ -58,12 +28,17 @@ void CFilterWidget::initGUI()
 
     mainLayout->addWidget(dialogButtons);
 
-    for (int i = 0; i < filter->countParameters(); ++i) {
-        auto parameterEditLine = new QLineEdit();
-        parameterEditLine->setText(QString::number(filter->getParameterValue(i)));
-        lineEditList.append(parameterEditLine);
-        formLayout->addRow(filter->getParameterName(i), parameterEditLine);
+    QMap<QString, float> filterParameters = filter->getParameters();
+    QMapIterator<QString, float> it(filterParameters);
+    while(it.hasNext())
+    {
+        it.next();
+        QLineEdit* parameterEditLine = new QLineEdit();
+        parameterEditLine->setText(QString::number(it.value()));
+        //lineEditList.append(parameterEditLine);
+        formLayout->addRow(it.key(), parameterEditLine);
     }
+
     mainLayout->addLayout(formLayout);
 
     connect(dialogButtons, SIGNAL(accepted()), this, SLOT(onRelease_buttonOK()));
@@ -73,26 +48,26 @@ void CFilterWidget::onRelease_buttonOK()
 {
     QList<float> newParameterValueList;
 
-    foreach (QLineEdit *lineEdit, lineEditList) {
-        if (lineEdit->text() == "") {
+
+    for(int i = 0; i < formLayout->rowCount(); i++)
+    {
+        bool ok;
+        QLayoutItem* item = formLayout->itemAt(i);
+        QString paramName = qobject_cast<QLabel*>(formLayout->labelForField(item->widget()))->text();
+        QLineEdit* valueEditLine = qobject_cast<QLineEdit*>(item->widget());
+        if (valueEditLine->text() == "")
+        {
             QMessageBox::information(this, "", "Enter value to parameter edit box");
             return;
         }
 
-        bool ok;
-        float newParameterValue = lineEdit->text().toFloat(&ok);
-        if (!ok) {
+        float paramValue = qobject_cast<QLineEdit*>(item->widget())->text().toFloat(&ok);
+        if (!ok)
+        {
             QMessageBox::information(this, "", "Invalid parameter value - not a number");
             return;
         }
 
-        newParameterValueList.append(newParameterValue);
+        filter->setParameter(paramName, paramValue);
     }
-
-    if (!filter->checkParametersValid(newParameterValueList)) {
-        QMessageBox::information(this, "", "Invalid parameter value");
-        return;
-    }
-
-    filter->setParametersValues(newParameterValueList);
 }
