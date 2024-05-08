@@ -13,7 +13,6 @@ SOURCES += \
     cfilterwidget.cpp \
     cimagecamerasource.cpp \
     cimagefilesource.cpp \
-    cimagehandler.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -24,7 +23,6 @@ HEADERS += \
     cfilterwidget.h \
     cimagecamerasource.h \
     cimagefilesource.h \
-    cimagehandler.h \
     mainwindow.h
 
 FORMS += \

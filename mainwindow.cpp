@@ -26,10 +26,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     setWindowTitle("Image Processing");
 
-    ui->filtersComboBox->addItem(CFilterBlur::getFilterName());
+    ui->filtersComboBox->addItem(CFilterBlur().getFilterName());
+    ui->filtersComboBox->addItem(CFilterErode().getFilterName());
 
-    ui->selectedFrameComboBoxLeft->addItem("Unchanged frame");
-    ui->selectedFrameComboBoxRight->addItem("Unchanged frame");
+    ui->selectedFrameComboBoxLeft->addItem("Origin frame");
+    ui->selectedFrameComboBoxRight->addItem("Origin frame");
 
     lastUsedFilterIndex = -1;
 
@@ -75,10 +76,8 @@ void MainWindow::connectSignals()
     connect(ui->usedFiltersList, SIGNAL(currentRowChanged(int)), this, SLOT(onChanged_usedFilter(int)));
 }
 
-void MainWindow::update()
+void MainWindow::updateLeftWindow()
 {
-    // ODSWIEZAC TYLKO PRZY DODANIU FILTRU LUB ZMIANIE PARAMETROW
-
     if(imgSource == nullptr)
         return;
 
@@ -86,24 +85,42 @@ void MainWindow::update()
         return;
 
 
-    QImage frame1, frame2;
-    cv::Mat cvFrame;
-    //imgHandler.updateObject();
-    //imgHandler.getFrame1().copyTo(cvFrame); //kopiowanie obrazu - SLABOOOOO
+    QImage leftFrame;
+    int leftWindowSelectedFilterIndex;
 
-    frame1 = Mat2QImage(imgSource->getImage());
-    //imgHandler.getFrame2().copyTo(cvFrame); //kopiowanie obrazu - SLABOOOOO
-    frame2 = Mat2QImage(imgSource->getImage());
-    ui->camWindowLeft->setPixmap(QPixmap::fromImage(frame1));
-    ui->camWindowRight->setPixmap(QPixmap::fromImage(frame2));
+    leftWindowSelectedFilterIndex = ui->selectedFrameComboBoxLeft->currentIndex();
+    processImage(srcImg, leftWindowImg, leftWindowSelectedFilterIndex);
+    leftFrame = Mat2QImage(leftWindowImg);
+    ui->camWindowLeft->setPixmap(QPixmap::fromImage(leftFrame));
+}
 
+void MainWindow::updateRightWindow()
+{
+    if(imgSource == nullptr)
+        return;
+
+    if(!imgSource->isOpen())
+        return;
+
+
+    QImage rightFrame;
+    int rightWindowSelectedFilterIndex;
+
+    rightWindowSelectedFilterIndex = ui->selectedFrameComboBoxRight->currentIndex();
+    processImage(srcImg, rightWindowImg, rightWindowSelectedFilterIndex);
+    rightFrame = Mat2QImage(rightWindowImg);
+    ui->camWindowRight->setPixmap(QPixmap::fromImage(rightFrame));
+}
+
+void MainWindow::update()
+{
+    updateLeftWindow();
+    updateRightWindow();
 }
 
 void MainWindow::removeFilter(unsigned int index)
 {
-    imgHandler.removeFilter(index);
-
-    ui->selectedFrameComboBoxLeft->removeItem(index + 1); // +1, bo zawsze jest Unchanged Frame na index = 0
+    ui->selectedFrameComboBoxLeft->removeItem(index + 1); // +1 because Origin Fram is at index 0
     ui->selectedFrameComboBoxRight->removeItem(index + 1);
 
     QListWidgetItem *indexToRemove = ui->usedFiltersList->takeItem(index);
@@ -144,7 +161,7 @@ void MainWindow::onReleased_buttonLoadImage()
         return;
     }
 
-    imgHandler.setFrame(imgSource->getImage());
+    getNewSrcImg();
     update();
 }
 
@@ -163,7 +180,6 @@ void MainWindow::onReleased_buttonCam()
     }
 
     imageCameraSourceTimer->start();
-    imgHandler.setFrame(imgSource->getImage());
     ui->camButton->setText("Close Cam");
 
 }
@@ -172,10 +188,12 @@ void MainWindow::onReleased_buttonAddFilter()
 {
     QString chosenFilterName = ui->filtersComboBox->currentText();
     CFilter* newFilter = CFilter::createFilter(chosenFilterName);
+    if(newFilter == nullptr)
+    {
+        qDebug() << "MainWindow::onReleased_buttonAddFilter() - newFilter is nullptr";
+        return;
+    }
     CFilterWidget *filterWidget = new CFilterWidget(newFilter);
-
-    //imgHandler.addFilter(filterWidget->getFilterPtr());
-    imgHandler.addFilter(newFilter);
 
     ui->usedFiltersList->addItem(chosenFilterName);
 
@@ -188,6 +206,7 @@ void MainWindow::onReleased_buttonAddFilter()
     ui->filterOptionsLayout->addWidget(filterWidget);
 
     selectLastUsedFilterIndex();
+
 }
 
 void MainWindow::onReleased_buttonRemoveFilter()
@@ -201,12 +220,12 @@ void MainWindow::onReleased_buttonRemoveFilter()
 
 void MainWindow::onChanged_comboBoxWindowLeft(int index)
 {
-    imgHandler.setKeptFrame1(index);
+    updateLeftWindow();
 }
 
 void MainWindow::onChanged_comboBoxWindowRight(int index)
 {
-    imgHandler.setKeptFrame2(index);
+    updateRightWindow();
 }
 
 void MainWindow::onChanged_usedFilter(int index)
@@ -228,6 +247,32 @@ void MainWindow::selectLastUsedFilterIndex()
     {
         ui->usedFiltersList->setCurrentRow(indexCount - 1);
         lastUsedFilterIndex = indexCount - 1;
-    } else
+    }
+    else
         lastUsedFilterIndex = -1;
+}
+
+void MainWindow::processImage(cv::Mat& src, cv::Mat& dst, int lastFilterIndex)
+{
+    if(lastFilterIndex < 0 || lastFilterIndex > filterWidgetList.count())
+        lastFilterIndex = filterWidgetList.count();
+
+    src.copyTo(dst);
+
+    for (int i = 0; i < lastFilterIndex; ++i)
+    {
+        filterWidgetList.at(i)->getFilterPtr()->useFilter(dst, dst);
+    }
+}
+
+void MainWindow::getNewSrcImg()
+{
+    srcImg = cv::Mat::zeros(1, 1, CV_64F);
+    if(imgSource == nullptr)
+        return;
+    if(!imgSource->isOpen())
+        return;
+
+    srcImg = imgSource->getImage();
+
 }

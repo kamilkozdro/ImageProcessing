@@ -12,13 +12,13 @@ class CFilter
 {
 public:
 
-    virtual ~CFilter();
+    virtual ~CFilter() {};
 
     static CFilter* createFilter(QString filterName);
 
     virtual void useFilter(cv::Mat& imgSrc, cv::Mat& imgDst) = 0;
     virtual bool checkParameterValid(QString key, float value) = 0;
-    static inline QString getFilterName() {return filterName;};
+    virtual QString getFilterName() = 0;
     inline QMap<QString, float> getParameters()
     {
         return parameters;
@@ -30,7 +30,6 @@ public:
 protected:
     CFilter();
 
-    static QString filterName;
     QMap<QString, float> parameters;
 
 private:
@@ -42,9 +41,11 @@ class CFilterBlur : public CFilter
 public:
     CFilterBlur()
     {
-        filterName = "Blur";
         parameters["ksize"] = 1;
     };
+    ~CFilterBlur() {};
+
+    inline QString getFilterName() override {return "Blur";};
 
     inline void useFilter(cv::Mat& imgSrc, cv::Mat& imgDst) override
     {
@@ -57,6 +58,29 @@ protected:
 
 private:
 
+
+};
+
+class CFilterErode : public CFilter
+{
+public:
+    CFilterErode()
+    {
+        parameters["iterations"] = 1;
+    };
+    ~CFilterErode() {};
+
+    inline QString getFilterName() override {return "Erode";};
+
+    inline void useFilter(cv::Mat& imgSrc, cv::Mat& imgDst) override
+    {
+        cv::erode(imgSrc, imgDst, cv::Mat(), cv::Point(-1, -1), parameters["iterations"]);
+    }
+
+    bool checkParameterValid(QString key, float value) override;
+protected:
+
+private:
 
 };
 

@@ -13,6 +13,8 @@
 #include <QWidget>
 #include "cfilter.h"
 
+#include <QDebug>
+
 #include <iostream>
 #include <stdexcept>
 
@@ -24,15 +26,12 @@ public:
     ~CFilterWidget();
 
     void initGUI();
-    //QList<float> getFilterValues() { return filter->getParameterValues(); };
     CFilter *getFilterPtr() { return filter; };
 
 private:
     //----------*GUI*----------
     QVBoxLayout *mainLayout;
     QFormLayout *formLayout;
-    //QList<QLineEdit *> lineEditList;
-    //QList<QString> labelsNames;
     QDialogButtonBox *dialogButtons;
     //-------------------------
     CFilter *filter;
