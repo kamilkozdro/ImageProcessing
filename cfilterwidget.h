@@ -1,12 +1,11 @@
 #ifndef CFILTERWIDGET_H
 #define CFILTERWIDGET_H
 
-#include <QMap>
-#include <QString>
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMap>
 #include <QMessageBox>
 #include <QString>
 #include <QVBoxLayout>
@@ -22,7 +21,7 @@ class CFilterWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CFilterWidget(CFilter* newFilter, QWidget *parent = nullptr);
+    explicit CFilterWidget(CFilter *newFilter, QWidget *parent = nullptr);
     ~CFilterWidget();
 
     void initGUI();

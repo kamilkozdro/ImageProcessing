@@ -37,15 +37,14 @@ MainWindow::MainWindow(QWidget *parent)
     imgSource = nullptr;
 
     imageCameraSourceTimer = new QTimer(this);
-    imageCameraSourceTimer->setInterval(500);
+    imageCameraSourceTimer->setInterval(100);
     connectSignals();
 }
 
 MainWindow::~MainWindow()
 {
-    if(imgSource != nullptr)
-    {
-        if(imgSource->isOpen())
+    if (imgSource != nullptr) {
+        if (imgSource->isOpen())
             imgSource->close();
         delete imgSource;
         imgSource = nullptr;
@@ -60,7 +59,7 @@ QImage MainWindow::Mat2QImage(cv::Mat &src)
     cvtColor(src, temp, cv::COLOR_BGR2RGB);
     QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
     dest.bits(); // enforce deep copy, see documentation
-                // of QImage::QImage ( const uchar * data, int width, int height, Format format )
+                 // of QImage::QImage ( const uchar * data, int width, int height, Format format )
     return dest;
 }
 
@@ -68,54 +67,58 @@ void MainWindow::connectSignals()
 {
     connect(imageCameraSourceTimer, &QTimer::timeout, this, &MainWindow::update);
     connect(ui->camButton, &QPushButton::released, this, &MainWindow::onReleased_buttonCam);
-    connect(ui->loadImageButton, &QPushButton::released, this, &MainWindow::onReleased_buttonLoadImage);
-    connect(ui->addFilterButton, &QPushButton::released, this, &MainWindow::onReleased_buttonAddFilter);
-    connect(ui->removeFilterButton, &QPushButton::released, this, &MainWindow::onReleased_buttonRemoveFilter);
-    connect(ui->selectedFrameComboBoxLeft, SIGNAL(currentIndexChanged(int)), this, SLOT(onChanged_comboBoxWindowLeft(int)));
-    connect(ui->selectedFrameComboBoxRight, SIGNAL(currentIndexChanged(int)), this, SLOT(onChanged_comboBoxWindowRight(int)));
-    connect(ui->usedFiltersList, SIGNAL(currentRowChanged(int)), this, SLOT(onChanged_usedFilter(int)));
-}
-
-void MainWindow::updateLeftWindow()
-{
-    if(imgSource == nullptr)
-        return;
-
-    if(!imgSource->isOpen())
-        return;
-
-
-    QImage leftFrame;
-    int leftWindowSelectedFilterIndex;
-
-    leftWindowSelectedFilterIndex = ui->selectedFrameComboBoxLeft->currentIndex();
-    processImage(srcImg, leftWindowImg, leftWindowSelectedFilterIndex);
-    leftFrame = Mat2QImage(leftWindowImg);
-    ui->camWindowLeft->setPixmap(QPixmap::fromImage(leftFrame));
-}
-
-void MainWindow::updateRightWindow()
-{
-    if(imgSource == nullptr)
-        return;
-
-    if(!imgSource->isOpen())
-        return;
-
-
-    QImage rightFrame;
-    int rightWindowSelectedFilterIndex;
-
-    rightWindowSelectedFilterIndex = ui->selectedFrameComboBoxRight->currentIndex();
-    processImage(srcImg, rightWindowImg, rightWindowSelectedFilterIndex);
-    rightFrame = Mat2QImage(rightWindowImg);
-    ui->camWindowRight->setPixmap(QPixmap::fromImage(rightFrame));
+    connect(ui->loadImageButton,
+            &QPushButton::released,
+            this,
+            &MainWindow::onReleased_buttonLoadImage);
+    connect(ui->addFilterButton,
+            &QPushButton::released,
+            this,
+            &MainWindow::onReleased_buttonAddFilter);
+    connect(ui->removeFilterButton,
+            &QPushButton::released,
+            this,
+            &MainWindow::onReleased_buttonRemoveFilter);
+    connect(ui->selectedFrameComboBoxLeft,
+            SIGNAL(currentIndexChanged(int)),
+            this,
+            SLOT(onChanged_comboBoxWindowLeft(int)));
+    connect(ui->selectedFrameComboBoxRight,
+            SIGNAL(currentIndexChanged(int)),
+            this,
+            SLOT(onChanged_comboBoxWindowRight(int)));
+    connect(ui->usedFiltersList,
+            SIGNAL(currentRowChanged(int)),
+            this,
+            SLOT(onChanged_usedFilter(int)));
 }
 
 void MainWindow::update()
 {
-    updateLeftWindow();
-    updateRightWindow();
+    QImage rightFrame, leftFrame;
+    int rightWindowSelectedFilterIndex, leftWindowSelectedFilterIndex;
+    cv::Mat srcImg;
+
+    if (imgSource == nullptr)
+        return;
+
+    if (!imgSource->isOpen())
+        return;
+
+    srcImg = imgSource->getImage();
+
+    // Update right window
+    rightWindowSelectedFilterIndex = ui->selectedFrameComboBoxRight->currentIndex();
+    processImage(srcImg, rightWindowImg, rightWindowSelectedFilterIndex);
+    rightFrame = Mat2QImage(rightWindowImg);
+    ui->camWindowRight->setPixmap(QPixmap::fromImage(rightFrame));
+
+    // Update left window
+    leftWindowSelectedFilterIndex = ui->selectedFrameComboBoxLeft->currentIndex();
+    processImage(srcImg, leftWindowImg, leftWindowSelectedFilterIndex);
+    leftFrame = Mat2QImage(leftWindowImg);
+    ui->camWindowLeft->setPixmap(QPixmap::fromImage(leftFrame));
+
 }
 
 void MainWindow::removeFilter(unsigned int index)
@@ -129,11 +132,10 @@ void MainWindow::removeFilter(unsigned int index)
     delete widgetToDelete;
 }
 
-bool MainWindow::openNewImageSource(CImageSource* newImgSource, QString args)
+bool MainWindow::openNewImageSource(CImageSource *newImgSource, QString args)
 {
     imageCameraSourceTimer->stop();
-    if(imgSource != nullptr)
-    {
+    if (imgSource != nullptr) {
         imgSource->close();
         delete imgSource;
         imgSource = nullptr;
@@ -141,8 +143,7 @@ bool MainWindow::openNewImageSource(CImageSource* newImgSource, QString args)
 
     newImgSource->open(args);
 
-    if(!newImgSource->isOpen())
-    {
+    if (!newImgSource->isOpen()) {
         return false;
     }
 
@@ -152,27 +153,22 @@ bool MainWindow::openNewImageSource(CImageSource* newImgSource, QString args)
 
 void MainWindow::onReleased_buttonLoadImage()
 {
-
-    CImageFileSource* newImgSource = new CImageFileSource();
-    if(!openNewImageSource(newImgSource))
-    {
+    CImageFileSource *newImgSource = new CImageFileSource();
+    if (!openNewImageSource(newImgSource)) {
         delete newImgSource;
         newImgSource = nullptr;
         return;
     }
 
-    getNewSrcImg();
     update();
 }
 
 void MainWindow::onReleased_buttonCam()
 {
-
-    CImageCameraSource* newImgSource = new CImageCameraSource();
+    CImageCameraSource *newImgSource = new CImageCameraSource();
     QString camID = ui->camIDSpinBox->text();
 
-    if(!openNewImageSource(newImgSource, camID))
-    {
+    if (!openNewImageSource(newImgSource, camID)) {
         delete newImgSource;
         newImgSource = nullptr;
         ui->camButton->setText("Open Cam");
@@ -180,16 +176,14 @@ void MainWindow::onReleased_buttonCam()
     }
 
     imageCameraSourceTimer->start();
-    ui->camButton->setText("Close Cam");
-
+    //ui->camButton->setText("Close Cam");
 }
 
 void MainWindow::onReleased_buttonAddFilter()
 {
     QString chosenFilterName = ui->filtersComboBox->currentText();
-    CFilter* newFilter = CFilter::createFilter(chosenFilterName);
-    if(newFilter == nullptr)
-    {
+    CFilter *newFilter = CFilter::createFilter(chosenFilterName);
+    if (newFilter == nullptr) {
         qDebug() << "MainWindow::onReleased_buttonAddFilter() - newFilter is nullptr";
         return;
     }
@@ -206,13 +200,11 @@ void MainWindow::onReleased_buttonAddFilter()
     ui->filterOptionsLayout->addWidget(filterWidget);
 
     selectLastUsedFilterIndex();
-
 }
 
 void MainWindow::onReleased_buttonRemoveFilter()
 {
-    if (ui->usedFiltersList->count() > 0)
-    {
+    if (ui->usedFiltersList->count() > 0) {
         removeFilter(ui->usedFiltersList->currentRow());
         selectLastUsedFilterIndex();
     }
@@ -220,12 +212,12 @@ void MainWindow::onReleased_buttonRemoveFilter()
 
 void MainWindow::onChanged_comboBoxWindowLeft(int index)
 {
-    updateLeftWindow();
+    update();
 }
 
 void MainWindow::onChanged_comboBoxWindowRight(int index)
 {
-    updateRightWindow();
+    update();
 }
 
 void MainWindow::onChanged_usedFilter(int index)
@@ -243,36 +235,21 @@ void MainWindow::onChanged_usedFilter(int index)
 void MainWindow::selectLastUsedFilterIndex()
 {
     int indexCount = ui->usedFiltersList->count();
-    if (indexCount >= 0)
-    {
+    if (indexCount >= 0) {
         ui->usedFiltersList->setCurrentRow(indexCount - 1);
         lastUsedFilterIndex = indexCount - 1;
-    }
-    else
+    } else
         lastUsedFilterIndex = -1;
 }
 
-void MainWindow::processImage(cv::Mat& src, cv::Mat& dst, int lastFilterIndex)
+void MainWindow::processImage(cv::Mat &src, cv::Mat &dst, int lastFilterIndex)
 {
-    if(lastFilterIndex < 0 || lastFilterIndex > filterWidgetList.count())
+    if (lastFilterIndex < 0 || lastFilterIndex > filterWidgetList.count())
         lastFilterIndex = filterWidgetList.count();
 
     src.copyTo(dst);
 
-    for (int i = 0; i < lastFilterIndex; ++i)
-    {
+    for (int i = 0; i < lastFilterIndex; ++i) {
         filterWidgetList.at(i)->getFilterPtr()->useFilter(dst, dst);
     }
-}
-
-void MainWindow::getNewSrcImg()
-{
-    srcImg = cv::Mat::zeros(1, 1, CV_64F);
-    if(imgSource == nullptr)
-        return;
-    if(!imgSource->isOpen())
-        return;
-
-    srcImg = imgSource->getImage();
-
 }

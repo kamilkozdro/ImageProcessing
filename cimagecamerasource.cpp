@@ -1,17 +1,13 @@
 #include "cimagecamerasource.h"
 
-CImageCameraSource::CImageCameraSource()
-{
-
-}
+CImageCameraSource::CImageCameraSource() {}
 
 void CImageCameraSource::open(QString arg)
 {
     bool convertResult = false;
     int camId = arg.toInt(&convertResult);
 
-    if(!convertResult)
-    {
+    if (!convertResult) {
         showMessageBox("Wrong camera ID", "Warning", QMessageBox::Icon::Warning);
         return;
     }
@@ -28,9 +24,9 @@ void CImageCameraSource::close()
     image.release();
 }
 
-cv::Mat & CImageCameraSource::getImage()
+cv::Mat &CImageCameraSource::getImage()
 {
-    if(isOpen())
+    if (isOpen())
         camera >> image;
 
     return image;

@@ -1,8 +1,8 @@
 #ifndef CMESSAGEBOX_H
 #define CMESSAGEBOX_H
 
-#include <QString>
 #include <QMessageBox>
+#include <QString>
 
 class CMessageBox
 {

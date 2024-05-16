@@ -3,28 +3,31 @@
 
 #include "CImageSource.h"
 #include "cfilterwidget.h"
-#include "cimagehandler.h"
 #include "cimagecamerasource.h"
 #include "cimagefilesource.h"
 
+#include <QComboBox>
+#include <QFileDialog>
 #include <QFrame>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QVBoxLayout>
-#include <QWidget>
-#include <QMainWindow>
-#include <QComboBox>
-#include <QFileDialog>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QMainWindow>
 #include <QPixmap>
 #include <QPushButton>
 #include <QStringList>
 #include <QTimer>
+#include <QVBoxLayout>
+#include <QWidget>
+
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow;}
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -39,24 +42,19 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    CImageSource* imgSource;
-    cv::Mat srcImg;
+    CImageSource *imgSource;
+    //cv::Mat srcImg;
     cv::Mat leftWindowImg;
     cv::Mat rightWindowImg;
-    CImageHandler LeftImgHandler;
-    CImageHandler RightImgHandler;
     QTimer *imageCameraSourceTimer;
-    QList<CFilterWidget*> filterWidgetList;
+    QList<CFilterWidget *> filterWidgetList;
     int lastUsedFilterIndex;
 
     QImage Mat2QImage(cv::Mat &src);
     void connectSignals();
-    bool openNewImageSource(CImageSource* newImgSource, QString args = "");
+    bool openNewImageSource(CImageSource *newImgSource, QString args = "");
     void selectLastUsedFilterIndex();
-    void processImage(cv::Mat& src, cv::Mat& dst, int lastFilterIndex = -1);
-    void getNewSrcImg();
-    void updateLeftWindow();
-    void updateRightWindow();
+    void processImage(cv::Mat &src, cv::Mat &dst, int lastFilterIndex = -1);
 
 private slots:
 

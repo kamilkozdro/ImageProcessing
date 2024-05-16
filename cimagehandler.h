@@ -14,11 +14,10 @@ public:
 
     void addFilter(CFilter *newFilter) { filterList.append(newFilter); };
     void removeFilter(unsigned int index);
-    void processImage(cv::Mat& src, cv::Mat& dst, int lastFilterIndex = -1);
+    void processImage(cv::Mat &src, cv::Mat &dst, int lastFilterIndex = -1);
 
 private:
-    QList<CFilter*> filterList;
-
+    QList<CFilter *> filterList;
 };
 
 #endif // CImageHandler_H

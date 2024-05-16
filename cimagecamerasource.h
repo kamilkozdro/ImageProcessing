@@ -8,11 +8,11 @@ class CImageCameraSource : public CImageSource, CMessageBox
 {
 public:
     CImageCameraSource();
-    ~CImageCameraSource()  override {};
+    ~CImageCameraSource() override{};
     void open(QString arg) override;
-    inline bool isOpen() override {return camera.isOpened();};
+    inline bool isOpen() override { return camera.isOpened(); };
     void close() override;
-    cv::Mat & getImage() override;
+    cv::Mat &getImage() override;
 
 protected:
     cv::VideoCapture camera;

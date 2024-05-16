@@ -10,12 +10,12 @@ class CImageFileSource : public CImageSource, CMessageBox
 {
 public:
     CImageFileSource();
-    ~CImageFileSource() override {};
+    ~CImageFileSource() override{};
 
     void open(QString arg) override;
-    inline bool isOpen() override {return imageLoaded;};
+    inline bool isOpen() override { return imageLoaded; };
     void close() override;
-    cv::Mat& getImage() override;
+    cv::Mat &getImage() override;
 
 protected:
     bool imageLoaded;
