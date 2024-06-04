@@ -36,9 +36,10 @@ private:
     CFilter *filter;
 
 private slots:
-    void onRelease_buttonOK();
+    void onRelease_buttonSave();
 
 signals:
+    void buttonSavedClicked();
 };
 
 #endif // CFILTERWIDGET_H

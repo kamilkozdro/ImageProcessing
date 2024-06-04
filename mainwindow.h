@@ -43,7 +43,6 @@ public:
 private:
     Ui::MainWindow *ui;
     CImageSource *imgSource;
-    //cv::Mat srcImg;
     cv::Mat leftWindowImg;
     cv::Mat rightWindowImg;
     QTimer *imageCameraSourceTimer;

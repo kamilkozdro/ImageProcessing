@@ -1,20 +1,3 @@
-/*
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-{
-    ui->setupUi(this);
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
-*/
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -27,7 +10,11 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Image Processing");
 
     ui->filtersComboBox->addItem(CFilterBlur().getFilterName());
+    ui->filtersComboBox->addItem(CFilterGaussianBlur().getFilterName());
     ui->filtersComboBox->addItem(CFilterErode().getFilterName());
+    ui->filtersComboBox->addItem(CFilterDilate().getFilterName());
+    ui->filtersComboBox->addItem(CFilterLaplacian().getFilterName());
+    ui->filtersComboBox->addItem(CFilterSobel().getFilterName());
 
     ui->selectedFrameComboBoxLeft->addItem("Origin frame");
     ui->selectedFrameComboBoxRight->addItem("Origin frame");
@@ -45,7 +32,7 @@ MainWindow::~MainWindow()
 {
     if (imgSource != nullptr) {
         if (imgSource->isOpen())
-            imgSource->close();
+ imgSource->close();
         delete imgSource;
         imgSource = nullptr;
     }
@@ -59,38 +46,28 @@ QImage MainWindow::Mat2QImage(cv::Mat &src)
     cvtColor(src, temp, cv::COLOR_BGR2RGB);
     QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
     dest.bits(); // enforce deep copy, see documentation
-                 // of QImage::QImage ( const uchar * data, int width, int height, Format format )
+      // of QImage::QImage ( const uchar * data, int width, int height, Format format )
     return dest;
 }
 
 void MainWindow::connectSignals()
 {
-    connect(imageCameraSourceTimer, &QTimer::timeout, this, &MainWindow::update);
-    connect(ui->camButton, &QPushButton::released, this, &MainWindow::onReleased_buttonCam);
-    connect(ui->loadImageButton,
-            &QPushButton::released,
-            this,
-            &MainWindow::onReleased_buttonLoadImage);
-    connect(ui->addFilterButton,
-            &QPushButton::released,
-            this,
-            &MainWindow::onReleased_buttonAddFilter);
-    connect(ui->removeFilterButton,
-            &QPushButton::released,
-            this,
-            &MainWindow::onReleased_buttonRemoveFilter);
-    connect(ui->selectedFrameComboBoxLeft,
-            SIGNAL(currentIndexChanged(int)),
-            this,
-            SLOT(onChanged_comboBoxWindowLeft(int)));
-    connect(ui->selectedFrameComboBoxRight,
-            SIGNAL(currentIndexChanged(int)),
-            this,
-            SLOT(onChanged_comboBoxWindowRight(int)));
-    connect(ui->usedFiltersList,
-            SIGNAL(currentRowChanged(int)),
-            this,
-            SLOT(onChanged_usedFilter(int)));
+    connect(imageCameraSourceTimer, &QTimer::timeout,
+            this, &MainWindow::update);
+    connect(ui->camButton, &QPushButton::released,
+            this, &MainWindow::onReleased_buttonCam);
+    connect(ui->loadImageButton, &QPushButton::released,
+            this, &MainWindow::onReleased_buttonLoadImage);
+    connect(ui->addFilterButton, &QPushButton::released,
+            this, &MainWindow::onReleased_buttonAddFilter);
+    connect(ui->removeFilterButton, &QPushButton::released,
+            this, &MainWindow::onReleased_buttonRemoveFilter);
+    connect(ui->selectedFrameComboBoxLeft, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(onChanged_comboBoxWindowLeft(int)));
+    connect(ui->selectedFrameComboBoxRight, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(onChanged_comboBoxWindowRight(int)));
+    connect(ui->usedFiltersList, SIGNAL(currentRowChanged(int)),
+            this, SLOT(onChanged_usedFilter(int)));
 }
 
 void MainWindow::update()
@@ -188,6 +165,9 @@ void MainWindow::onReleased_buttonAddFilter()
         return;
     }
     CFilterWidget *filterWidget = new CFilterWidget(newFilter);
+
+    connect(filterWidget, &CFilterWidget::buttonSavedClicked,
+            this, &MainWindow::update);
 
     ui->usedFiltersList->addItem(chosenFilterName);
 

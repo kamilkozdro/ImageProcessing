@@ -10,7 +10,8 @@ CFilterWidget::CFilterWidget(CFilter *newFilter, QWidget *parent)
 
 CFilterWidget::~CFilterWidget()
 {
-    if (filter != nullptr) {
+    if (filter != nullptr)
+    {
         delete filter;
         filter = nullptr;
     }
@@ -28,7 +29,8 @@ void CFilterWidget::initGUI()
 
     QMap<QString, float> filterParameters = filter->getParameters();
     QMapIterator<QString, float> it(filterParameters);
-    while (it.hasNext()) {
+    while (it.hasNext())
+    {
         it.next();
         QLineEdit *parameterEditLine = new QLineEdit();
         parameterEditLine->setText(QString::number(it.value()));
@@ -37,10 +39,10 @@ void CFilterWidget::initGUI()
 
     mainLayout->addLayout(formLayout);
 
-    connect(dialogButtons, SIGNAL(accepted()), this, SLOT(onRelease_buttonOK()));
+    connect(dialogButtons, SIGNAL(accepted()), this, SLOT(onRelease_buttonSave()));
 }
 
-void CFilterWidget::onRelease_buttonOK()
+void CFilterWidget::onRelease_buttonSave()
 {
     for (int i = 0; i < formLayout->rowCount(); i++) {
         bool ok;
@@ -49,17 +51,21 @@ void CFilterWidget::onRelease_buttonOK()
 
         QLayoutItem *lineEditItem = formLayout->itemAt(i, QFormLayout::FieldRole);
         QString paramValueString = qobject_cast<QLineEdit *>(lineEditItem->widget())->text();
-        if (paramValueString == "") {
+        if (paramValueString == "")
+        {
             QMessageBox::information(this, "", "Enter value to parameter edit box");
             return;
         }
 
         float paramValue = paramValueString.toFloat(&ok);
-        if (!ok) {
+        if (!ok)
+        {
             QMessageBox::information(this, "", "Invalid parameter value - not a number");
             return;
         }
 
         filter->setParameter(paramName, paramValue);
+
+        emit buttonSavedClicked();
     }
 }

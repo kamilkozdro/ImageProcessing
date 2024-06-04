@@ -16,7 +16,7 @@ public:
     static CFilter *createFilter(QString filterName);
 
     virtual void useFilter(cv::Mat &imgSrc, cv::Mat &imgDst) = 0;
-    virtual bool checkParameterValid(QString key, float value) = 0;
+    bool checkParameterValid(QString key, float value);
     virtual QString getFilterName() = 0;
     inline QMap<QString, float> getParameters() { return parameters; }
 
@@ -44,8 +44,6 @@ public:
         cv::blur(imgSrc, imgDst, cv::Size(parameters["ksize"], parameters["ksize"]));
     }
 
-    bool checkParameterValid(QString key, float value) override;
-
 protected:
 private:
 };
@@ -63,10 +61,94 @@ public:
         cv::erode(imgSrc, imgDst, cv::Mat(), cv::Point(-1, -1), parameters["iterations"]);
     }
 
-    bool checkParameterValid(QString key, float value) override;
+protected:
+private:
+};
+
+class CFilterDilate : public CFilter
+{
+public:
+    CFilterDilate() { parameters["iterations"] = 1; };
+    ~CFilterDilate(){};
+
+    inline QString getFilterName() override { return "Dilate"; };
+
+    inline void useFilter(cv::Mat &imgSrc, cv::Mat &imgDst) override
+    {
+        cv::dilate(imgSrc, imgDst, cv::Mat(), cv::Point(-1, -1), parameters["iterations"]);
+    }
 
 protected:
 private:
 };
+
+class CFilterGaussianBlur : public CFilter
+{
+public:
+    CFilterGaussianBlur()
+    {
+        parameters["ksize"] = 1;
+        parameters["sigmaX"] = 0;
+        parameters["sigmaY"] = 0;
+    };
+    ~CFilterGaussianBlur(){};
+
+    inline QString getFilterName() override { return "GaussianBlur"; };
+
+    inline void useFilter(cv::Mat &imgSrc, cv::Mat &imgDst) override
+    {
+        cv::GaussianBlur(imgSrc, imgDst, cv::Size(parameters["ksize"], parameters["ksize"])
+                         ,parameters["sigmaX"], parameters["sigmaY"]);
+    }
+
+protected:
+private:
+};
+
+class CFilterLaplacian : public CFilter
+{
+public:
+    CFilterLaplacian()
+    {
+        parameters["ksize"] = 1;
+    };
+    ~CFilterLaplacian(){};
+
+    inline QString getFilterName() override { return "Laplacian"; };
+
+    inline void useFilter(cv::Mat &imgSrc, cv::Mat &imgDst) override
+    {
+        // ddepth=-1, the output image will have the same depth as the source
+        cv::Laplacian(imgSrc, imgDst, CV_8U, parameters["ksize"]);
+    }
+
+protected:
+private:
+};
+
+class CFilterSobel : public CFilter
+{
+public:
+    CFilterSobel()
+    {
+        parameters["dx"] = 1;
+        parameters["dy"] = 1;
+        parameters["ksize"] = 1;
+    };
+    ~CFilterSobel(){};
+
+    inline QString getFilterName() override { return "Sobel"; };
+
+    inline void useFilter(cv::Mat &imgSrc, cv::Mat &imgDst) override
+    {
+        // ddepth=-1, the output image will have the same depth as the source
+        cv::Sobel(imgSrc, imgDst, -1, parameters["dx"], parameters["dy"],
+                  parameters["ksize"]);
+    }
+
+protected:
+private:
+};
+
 
 #endif // CFILTER_H
