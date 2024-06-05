@@ -177,7 +177,7 @@ void MainWindow::onReleased_buttonAddFilter()
     filterWidgetList.append(filterWidget);
     filterWidget->hide();
 
-    ui->filterOptionsLayout->addWidget(filterWidget);
+    ui->filterParamsBox->layout()->addWidget(filterWidget);
 
     selectLastUsedFilterIndex();
 }
