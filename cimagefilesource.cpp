@@ -24,6 +24,8 @@ void CImageFileSource::open(QString arg)
         return;
     }
 
+    scaleImage(image, image, 800);
+
     imageLoaded = true;
 }
 
@@ -35,5 +37,6 @@ void CImageFileSource::close()
 
 cv::Mat &CImageFileSource::getImage()
 {
+
     return image;
 }

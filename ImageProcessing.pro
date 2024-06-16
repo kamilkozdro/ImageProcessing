@@ -33,8 +33,22 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../Library/opencv/build/x64/vc16/lib/ -lopencv_world490
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../Library/opencv/build/x64/vc16/lib/ -lopencv_world490d
+# --------------------------
+# Debug version libraries:
 
-INCLUDEPATH += $$PWD/../../../Library/opencv/build/include
-DEPENDPATH += $$PWD/../../../Library/opencv/build/include
+win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../Library/opencv/build/x64/vc16/lib/ -lopencv_world490d
+
+win32:CONFIG(debug, debug|release): INCLUDEPATH += $$PWD/../../../Library/opencv/build/include
+win32:CONFIG(debug, debug|release): DEPENDPATH += $$PWD/../../../Library/opencv/build/include
+
+# --------------------------
+# Release version libraries:
+
+win32:CONFIG(release, debug|release):  LIBS += -L$$PWD/../../../Library/opencv-4.10.0-img-process-build/install/x64/vc17/lib/ -lopencv_core4100
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../Library/opencv-4.10.0-img-process-build/install/x64/vc17/lib/ -lopencv_highgui4100
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../Library/opencv-4.10.0-img-process-build/install/x64/vc17/lib/ -lopencv_imgcodecs4100
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../Library/opencv-4.10.0-img-process-build/install/x64/vc17/lib/ -lopencv_imgproc4100
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../Library/opencv-4.10.0-img-process-build/install/x64/vc17/lib/ -lopencv_videoio4100
+
+win32:CONFIG(release, debug|release): INCLUDEPATH += $$PWD/../../../Library/opencv-4.10.0-img-process-build/install/include
+win32:CONFIG(release, debug|release): DEPENDPATH += $$PWD/../../../Library/opencv-4.10.0-img-process-build/install/include

@@ -29,5 +29,7 @@ cv::Mat &CImageCameraSource::getImage()
     if (isOpen())
         camera >> image;
 
+    scaleImage(image, image, 800);
+
     return image;
 }
